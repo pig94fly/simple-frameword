@@ -10,5 +10,8 @@
   include '../config.php';
   //自动加载文件
   include '../bootstrap/autoload.php';
+  //需求文件引入
+  include '../bootstrap/include.php';
 
-  echo URI;
+  //框架执行文件
+  require '../bootstrap/app.php';
