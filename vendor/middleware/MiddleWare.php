@@ -25,7 +25,9 @@
     public function doMiddleWare()
     {
       foreach ($this->middleWare as $fun) {
-
+        $method = $this->middleWare_list[$fun];
+        $func = new LoadFunction;
+        $func->load($method);
       }
     }
 

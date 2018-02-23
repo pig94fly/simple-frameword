@@ -29,7 +29,7 @@
      * 提供自定义的参数
      * @var Array
      */
-    private $params;
+    private $params = null;
     /**
      * 不匹配的key值
      * @var Bool
@@ -72,6 +72,11 @@
       if (!empty($middleWare)) {
         $this->doMiddleWare();
       }
+      if (is_object($this->storage)) {
+        $func = $this->storage;
+        $func();return ;
+      }
+      Easy::loadFunction($this->storage,$this->params);
     }
 
     private function doMiddleWare()
