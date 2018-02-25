@@ -39,7 +39,7 @@
      * 中间件匹配方法
      * @var Array
      */
-    private $middleWare = null;
+    private $middleWare = array();
     /**
     * 构造函数
     * @var __construct
@@ -48,20 +48,23 @@
     {
       $this->uri = $uri;
       $this->storage = $storage;
-      is_null($middleWare)? :$this->$middleWare = $middleWare;
+      is_null($middleWare)? :$this->middleWare = $middleWare;
       if ($method!==null) $this->methods = $method;
     }
 
-    public function match($requestUri)
+    public function match()
     {
-      $this->uri_arr = explode('/',$this->uri);
-      $uri_arr = explode('/',$requestUri);
-      $this->matchLastUri();
-      $uri_num = count($this->uri_arr);
-      $requestUri_num = count($uri_arr);
+      if ($this->methods!='ANY'&&$_SERVER['REQUEST_METHOD']!=$this->methods) {
+        return false;
+      }
+      $this->uri_arr = explode('/',$this->uri);   //explode uri array
+      $uri_arr = explode('/',URI);        //explode requesturi
+      $this->matchLastUri();                      //last argument is need？
+      $uri_num = count($this->uri_arr);           //matching uri num
+      $requestUri_num = count($uri_arr);          //request uri num
       if ($this->ignore_last&&abs($requestUri_num-$uri_num)>1) {
         return false;
-      }elseif ($requestUri_num!==$uri_num) {
+      }elseif (!$this->ignore_last&&$requestUri_num!==$uri_num) {
         return false;
       }
       return $this->matchUriArr($uri_arr);
@@ -76,13 +79,19 @@
         $func = $this->storage;
         $func();return ;
       }
-      Easy::loadFunction($this->storage,$this->params);
+      $storage = 'app\Http\Controller\\'.$this->storage;
+      Easy::loadFunction($storage,$this->params);
     }
 
     private function doMiddleWare()
     {
       $middleWare = new MiddleWare($this->middleWare);
       $middleWare->doMiddleWare();
+    }
+
+    private function checkUriNum()
+    {
+      # code...
     }
 
     private function matchLastUri()
@@ -97,18 +106,18 @@
       if ($this->ignore_last) {
         for ($i=0;$i<count($this->uri_arr)-1;$i++) {
           if (preg_match('/:[^\?]+/',$this->uri_arr[$i])) {
-            $this->params[substr($this->uri_arr[$i],0,-1)] = $uri_arr[$i];
+            $this->params[] = $uri_arr[$i];
             continue;
           }elseif ($this->uri_arr[$i]!=$uri_arr[$i]) {
             return false;
           }
         }
-        if (isset($uri_arr[$i])) $this->params[substr($this->$uri_arr[$i],1,-1)] = $uri_arr[$i];
+        if (isset($uri_arr[$i])) $this->params[] = $uri_arr[$i];
         return true;
       }
       foreach ($this->uri_arr as $key => $value) {
         if (preg_match('/:[^\?]+/',$value)) {
-          $this->params[substr($value,0,-1)] = $uri_arr[$key];
+          $this->params[] = $uri_arr[$key];
           continue;
         }elseif ($value!=$uri_arr[$key]) {
           return false;

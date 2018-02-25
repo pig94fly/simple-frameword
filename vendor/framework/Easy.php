@@ -10,6 +10,15 @@
     */
     static function loadFunction($methods,$argument)
     {
+      function load($method,$argument)
+      {
+        $arr = explode('@',$method);
+        $className = $arr[0];
+        $funName = $arr[1];
+        $class = new $className;
+        is_array($argument)?@$class->$funName(...$argument):$class->$funName($argument);
+      }
+
       if (is_array($methods)) {
         foreach ($methods as $key=>$method) {
           load($method,$argument[$key]);
@@ -18,12 +27,7 @@
         load($methods,$argument);
       }
 
-      function load($method,$argument)
-      {
-        $method = explode('@',$method);
-        $class = new $method[0];
-        $class->$method[1](...$argument);
-      }
+
     }
   }
 

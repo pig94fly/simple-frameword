@@ -28,12 +28,12 @@
      * uri匹配函数
      * @var Function
      */
-    public function match($requestUri)
+    public function match()
     {
       foreach ($this->routes as $route) {
-        if ($route->match($requestUri)) return $route;
+        if ($route->match()) return $route;
       }
-      header('Location:'.HTTP_HOST);exit;
+      header('Location:'.HTTP_HOST.'/404.html');exit;
     }
 
     //GET FUNCTION()
@@ -44,7 +44,7 @@
     //POST FUNCTION()
     public function post($uri,$storage,$middleWare=null)
     {
-      is_array($middleWare)?$middleWare[] = 'csrfToken':$middleWare = $this->processMiddleWare($middleWare,'csrfToken');
+      is_null($middleWare)?$middleWare = array('csrfToken'):$middleWare[] = 'csrfToken';
       return $this->add($uri,$storage,$middleWare,'POST');
     }
     //PUT FUNCTION()
@@ -62,10 +62,16 @@
     {
       return $this->add($uri,$storage,$middleWare,'PATCH');
     }
+
+    public function any($uri,$storage,$middleWare=null)
+    {
+      return $this->add($uri,$storage,$middleWare,'ANY');
+    }
     //中间件配置函数
     private function processMiddleWare($preMethod,$additional)
     {
-      return $middleWare = array($preMethod,$additional);
+      is_null($preMethod)?$middleWare = array($additional):$middleWare = array($preMethod,$additional);
+      return $middleWare;
     }
 
   }
